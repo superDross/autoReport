@@ -1,16 +1,24 @@
 import openpyxl
+import click
+import tqdm
 from get_spreadsheet_info import ExtractInfo 
 from create_template import create_template
 from fill_report import FillReport
-from tqdm import * 
 
-def produce_variant_report(variant_alias_file, output_path, image_dir, xlsx, sheet):
+
+@click.command('autoreport')
+@click.argument('variant_alias_file')
+@click.option('--xlsx')
+@click.option('--sheet', default="0")
+@click.option('--output')
+@click.option('--images')
+def main(variant_alias_file, output, images, xlsx, sheet):
     ''' For each variant alias, extract the approriate variant and mutation
-        information and append them to the variant confirmation template
+        information and export as a variant confirmation report.
         
-            variant_alias_file: should be in a text file where each new line
-                                contains a different variant alias or a single
-                                variant alias.
+        variant_alias_file: should be in a text file where each new line
+                            contains a different variant alias or a single
+                            variant alias.
     '''
     # intialise 2 objects using All_Variants & Mutation ID sheets
     extract = ExtractInfo(xlsx, sheet, 2)    
@@ -23,13 +31,13 @@ def produce_variant_report(variant_alias_file, output_path, image_dir, xlsx, she
     create_variant_dict = extract.create_header_dicts(variant_sheet)
 
     # create a template report
-    create_template(output_path)
+    create_template(output)
     
     # for each variant alias...
 
     variant_list = [var_alias for var_alias in open(variant_alias_file, "r")]
 
-    for var_alias in tqdm(variant_list):
+    for var_alias in tqdm.tqdm(variant_list):
         var_alias = var_alias.rstrip("\n")
         
         # Open template every iteration, otherwise information leftover from last iter in
@@ -45,7 +53,7 @@ def produce_variant_report(variant_alias_file, output_path, image_dir, xlsx, she
         variant_dict = extract.header_contents
         
         # with the collected information, fill out the template report. 
-        Fill = FillReport(template, template_sheet, var_alias, variant_dict, image_dir)
+        Fill = FillReport(template, template_sheet, var_alias, variant_dict, images)
         Fill.fill_report()
 
         # insert sanger trace and IGV image into the report
@@ -59,13 +67,13 @@ def produce_variant_report(variant_alias_file, output_path, image_dir, xlsx, she
         #print("\t".join((var_alias,variant_dict.get("Category"),
                         # variant_dict.get("Mutation_ID"))))
 
-        output_file_name = (output_path+str(variant_dict.get("Sample_Name"))+
+        output_name = (output+str(variant_dict.get("Sample_Name"))+
                             "_"+str(variant_dict.get("Variant_Alias"))+"_"+
                             "VariantConfirmationReport"+".xlsx")
 
         # save the filled sheet and convert to PDF
-        template.save(output_file_name)
-        Fill.convert2pdf(output_file_name)
+        template.save(output_name)
+        Fill.convert2pdf(output_name)
         
         # clear the dicts items
         variant_dict = {key: "-" for key in variant_dict}
@@ -75,10 +83,7 @@ def produce_variant_report(variant_alias_file, output_path, image_dir, xlsx, she
 
 
 
+if __name__ == '__main__':
+    main()
 
 
-
-produce_variant_report("report_in.txt", "/home/david/", 
-                       "/home/david/configuration/ideas/autoReport/test/images/", 
-                       "/home/david/configuration/ideas/autoReport/autoReport/All_Yale_&_UK_Variants.xlsx",
-                       "All_Variants")

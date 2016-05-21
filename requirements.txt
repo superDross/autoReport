@@ -1,2 +1,4 @@
-click
-openpyxl
+tqdm        python
+click       python
+openpyxl    python
+gnumeric    linux
