@@ -20,6 +20,7 @@ def main(variant_alias_file, output, images, xlsx, sheet):
                             contains a different variant alias or a single
                             variant alias.
     '''
+    
     # intialise 2 objects using All_Variants & Mutation ID sheets
     extract = ExtractInfo(xlsx, sheet, 2)    
     extract_mutation = ExtractInfo(xlsx, "Mutations ID", 2)
@@ -40,8 +41,8 @@ def main(variant_alias_file, output, images, xlsx, sheet):
     for var_alias in tqdm.tqdm(variant_list):
         var_alias = var_alias.rstrip("\n")
         
-        # Open template every iteration, otherwise information leftover from last iter in
-        # cells 
+        # Open template every iteration, otherwise information leftover from last 
+        # iter in cells
         template = openpyxl.load_workbook("test_template.xlsx")
         template_sheet = template.worksheets[0]
     
@@ -58,6 +59,7 @@ def main(variant_alias_file, output, images, xlsx, sheet):
 
         # insert sanger trace and IGV image into the report
         Fill.insert_image(var_alias+"_F", "B22")
+        Fill.insert_image(var_alias+"_R", "B22")
         Fill.insert_image(var_alias+"_IGV", "B35")
 
         
@@ -77,9 +79,7 @@ def main(variant_alias_file, output, images, xlsx, sheet):
         
         # clear the dicts items
         variant_dict = {key: "-" for key in variant_dict}
-
-
-
+    
 
 
 
