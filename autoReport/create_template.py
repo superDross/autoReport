@@ -1,7 +1,6 @@
 import openpyxl
 from openpyxl.styles import Border, Alignment, Font, Side
 from openpyxl.styles.colors import BLACK
-from useful_tools import useful
 
 
 

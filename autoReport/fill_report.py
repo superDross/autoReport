@@ -2,7 +2,6 @@ import openpyxl
 import re
 import os
 import subprocess
-from useful_tools import useful
 
 class FillReport(object):
     
