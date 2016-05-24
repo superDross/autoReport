@@ -3,11 +3,31 @@ import sys
 from openpyxl.styles import Border, Alignment, Font, Side
 from openpyxl.styles.colors import BLACK
 
-# alter formating if it is windows
 
 def create_template(output_path=""):
     ''' Create a template report workbook
     '''
+    # variable defined dependent upon system used.
+    if sys.platform == "win32":
+        end_title_cell = "D"
+        start_entry_cell = "E"
+        start_entry_cell_num = 5
+        end_entry_cell = "H"
+        column = range(2,9)
+        end_border = 9
+
+    elif sys.platform in ("cygwin","linux","linux2"):
+        end_title_cell = "E"
+        start_entry_cell = "F"
+        start_entry_cell_num = 6
+        end_entry_cell = "J"
+        column = range(2,11)
+        end_border = 11
+
+    else:
+        print("Unknown system platform. The system platform is "+sys.platform)
+
+
     # create worksheet
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -15,23 +35,25 @@ def create_template(output_path=""):
 
 
     # merge cells
-    ws.merge_cells('B1:J1')
-    ws.merge_cells('F4:J4')
-    ws.merge_cells('B16:E20')
-    ws.merge_cells('B21:E21')
-    ws.merge_cells('F16:J20')
-    ws.merge_cells('B33:D33')
-    ws.merge_cells('B47:J48')
+    ws.merge_cells('B1:'+end_entry_cell+'1')
+    ws.merge_cells(start_entry_cell+'4:'+end_entry_cell+'4')
+    ws.merge_cells(start_entry_cell+'16:'+end_entry_cell+'20')
+    ws.merge_cells('B47:'+end_entry_cell+'48')
+    ws.merge_cells('B16:'+end_title_cell+'20')
+    ws.merge_cells('B21:'+end_title_cell+'21')
+    ws.merge_cells('B33:'+end_title_cell+'33')
+
+
 
     for num in range(4, 16):
         if num != 9 and num != 10:
-            cell_range = "".join(("B", str(num), ":", "E", str(num)))
+            cell_range = "".join(("B", str(num), ":", end_title_cell, str(num)))
             ws.merge_cells(cell_range)   
 
-    ws.merge_cells('B9:E10')
+    ws.merge_cells('B9:'+end_title_cell+'10')
 
     for n in range(7, 16):
-        cell_range = "".join(("F", str(n), ":", "J", str(n)))
+        cell_range = "".join((start_entry_cell, str(n), ":", end_entry_cell, str(n)))
         ws.merge_cells(cell_range)
 
 
@@ -46,28 +68,24 @@ def create_template(output_path=""):
 
 
     # apply border and alignment
-    for i in range(7,21):
-        ws.cell(row=i, column=2).border = thin_border
-        ws.cell(row=i, column=11).border = Border(left=Side(border_style='thin'))
-        ws.cell(row=i, column=3).border = thin_border
-        ws.cell(row=i, column=4).border = thin_border
-        ws.cell(row=i, column=5).border = thin_border
-        ws.cell(row=i, column=6).border = thin_border
-        ws.cell(row=i, column=7).border = thin_border
-        ws.cell(row=i, column=8).border = thin_border
-        ws.cell(row=i, column=9).border = thin_border
-        ws.cell(row=i, column=10).border = thin_border
+    row = range(7,21)
+    for i in row:
+        ws.cell(row=i, column=end_border).border = Border(left=Side(border_style='thin'))
         ws.cell(row=i, column=2).alignment = center_v
-
-    for i in range(6,11):
+        
+        for x in column:
+            ws.cell(row=i, column=x).border = thin_border
+       
+    
+    for i in range(start_entry_cell_num,end_border):
         ws.cell(row=10, column=i).border = Border(top=Side(border_style=None))
         ws.cell(row=9, column=i).border = Border(bottom=Side(border_style=None))
 
-    ws.cell(row=10,column=10).border = Border(right=Side(border_style="thin"))
-    ws.cell(row=9,column=10).border = Border(right=Side(border_style="thin"))
+    ws.cell(row=10,column=end_border-1).border = Border(right=Side(border_style="thin"))
+    ws.cell(row=9,column=end_border-1).border = Border(right=Side(border_style="thin"))
 
 
-    for i in range(6,11):
+    for i in range(start_entry_cell_num,end_border):
         ws.cell(row=4, column=i).border = thin_border
 
 
@@ -75,14 +93,14 @@ def create_template(output_path=""):
 
     # stylise entry cells and their title cells
     for i in range(7,17):
-        cell = ws.cell(row=i,column=6)
+        cell = ws.cell(row=i,column=start_entry_cell_num)
         cell.alignment = Alignment(horizontal="center", vertical="center")
         cell.font = Font(size=10, color=BLACK)
         title_cell = ws.cell(row=i, column=2)
         title_cell.font = Font(size=14, color=BLACK)
 
     
-    comment_cell = ws.cell(row=16, column=6)
+    comment_cell = ws.cell(row=16, column=start_entry_cell_num)
     comment_cell.font = Font(size=6, color=BLACK)
     comment_cell.style.alignment.wrap_text = True
     ws["F4"].alignment = Alignment(horizontal="center", vertical="center")
