@@ -1,5 +1,6 @@
 import openpyxl
 import re
+import sys
 import os
 import subprocess
 
@@ -46,14 +47,14 @@ class FillReport(object):
         self.template_sheet["F15"] = "Y"
 
 
-    def insert_image(self, query, cell):
+    def insert_image(self, query, cell, width, height):
         ''' Find an image based upon the query give and insert the image into the 
             spreadsheet
         '''
         image = [self.image_dir+image for image in os.listdir(self.image_dir) 
                  if query in image]
         if image:
-            resized_image = openpyxl.drawing.image.Image(image[0],size=(623,242))
+            resized_image = openpyxl.drawing.image.Image(image[0],size=(width,height))
             self.template_sheet.add_image(resized_image, cell)
         else:
             pass
@@ -85,7 +86,7 @@ class FillReport(object):
         '''    
         
         if self.variant_dict.get("Variant_Class") == "DM?":
-            comment =( "This mutation has been asserted as a likely disease-causing\nmuatation in the HGMD database"+"\n\nHGMD Accession: "+self.variant_dict.get("Mutation_ID")+ "\nHGMD Classification: "+self.variant_dict.get("Variant_Class")+"\n"+self.variant_dict.get("First_Publication")+"\n\nDate of Variant Class Change From DM to DM?: "+str(self.variant_dict.get("Date_Class_Change"))+"\n"+self.variant_dict.get("Variant_Class_Change"))
+            comment =("This mutation has been asserted as a likely disease-causing\nmuatation in the HGMD database"+"\n\nHGMD Accession: "+self.variant_dict.get("Mutation_ID")+ "\nHGMD Classification: "+self.variant_dict.get("Variant_Class")+"\n"+self.variant_dict.get("First_Publication")+"\n\nDate of Variant Class Change From DM to DM?: "+str(self.variant_dict.get("Date_Class_Change"))+"\n"+self.variant_dict.get("Variant_Class_Change"))
             self.template_sheet["F16"] = comment
         else:
             comment = "This mutation has been asserted as a disease-causing\nmuatation in the HGMD database"+"\n\nHGMD Accession: "+self.variant_dict.get("Mutation_ID")+ "\nHGMD Classification: "+self.variant_dict.get("Variant_Class")+"\n"+self.variant_dict.get("First_Publication")
@@ -122,14 +123,14 @@ class FillReport(object):
             
             if exon_num in (int(exon_total)-2, int(exon_total)-1, int(exon_total)): 
                 self.template_sheet["F16"] = ("This mutations is expected to produce"+
-                                "a truncated product")
+                                              "a truncated product")
             elif exon_num < int(exon_total)-2:
                 self.template_sheet["F16"] = ("This mutation introduces a premature"+
-                                "stop codon and is likely to be \npathogenic")
+                                              "stop codon and is likely to be \npathogenic")
             else:
                 self.template_sheet["F16"] = ("LOF mutation present, but the"+ 
-                                "outcome cannot be determined \nwithout"+ 
-                                "exon numbering information")
+                                              "outcome cannot be determined \nwithout"+ 
+                                              "exon numbering information")
         
         elif intron != "-":
             self.template_sheet["B8"] = "Intron"
@@ -137,12 +138,28 @@ class FillReport(object):
             self.template_sheet["F8"] = intron
     
     def convert2pdf(self, input_file):
-        '''
+        ''' convert the xlsx file to a pdf file. 
         '''
         # supress font.config warnings displaying
         FNULL = open(os.devnull, 'w')
-        subprocess.call(["ssconvert", input_file, input_file.replace("xlsx","pdf")],
-                       stdout=FNULL, stderr=subprocess.STDOUT)
+        renamed_file = input_file.replace("xlsx","pdf")
+
+        if sys.platform in ("cygwin","linux2","linux"):
+            subprocess.call(["ssconvert", input_file, renamed_file],
+                            stdout=FNULL, stderr=subprocess.STDOUT)
+        
+        elif sys.platform =="win32":
+            # untested code below
+            from win32com import client
+            xlApp = client.Dispatch("Excel.Application")
+            books = xlApp.Workbooks.open(input_file)
+            ws = books.Worksheets[0]
+            ws.Visible = 1
+            ws.ExportAsFixedFormat(0, renamed_file)
+        
+        else:
+            print("Unrecognised system platform.\nYour system platform is " + sys.platform)
+
         
 
 

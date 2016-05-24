@@ -5,6 +5,7 @@ from get_spreadsheet_info import ExtractInfo
 from create_template import create_template
 from fill_report import FillReport
 
+# if alter image size
 
 @click.command('autoreport')
 @click.argument('variant_alias_file')
@@ -12,7 +13,8 @@ from fill_report import FillReport
 @click.option('--sheet', default="0")
 @click.option('--output')
 @click.option('--images')
-def main(variant_alias_file, output, images, xlsx, sheet):
+@click.option('--pdf/--xlsx_only',default='n')
+def main(variant_alias_file, output, images, xlsx, sheet, pdf):
     ''' For each variant alias, extract the approriate variant and mutation
         information and export as a variant confirmation report.
         
@@ -23,7 +25,6 @@ def main(variant_alias_file, output, images, xlsx, sheet):
     
     # intialise 2 objects using All_Variants & Mutation ID sheets
     extract = ExtractInfo(xlsx, sheet, 2)    
-    extract_mutation = ExtractInfo(xlsx, "Mutations ID", 2)
 
     # open the All_Variants and Mutation ID sheet
     variant_sheet = extract.open_spreadsheets()
@@ -56,11 +57,12 @@ def main(variant_alias_file, output, images, xlsx, sheet):
         # with the collected information, fill out the template report. 
         Fill = FillReport(template, template_sheet, var_alias, variant_dict, images)
         Fill.fill_report()
+       
 
         # insert sanger trace and IGV image into the report
-        Fill.insert_image(var_alias+"_F", "B22")
-        Fill.insert_image(var_alias+"_R", "B22")
-        Fill.insert_image(var_alias+"_IGV", "B35")
+        Fill.insert_image(var_alias+"_F", "B22", 600, 242)
+        Fill.insert_image(var_alias+"_R", "B22", 600, 242)
+        Fill.insert_image(var_alias+"_IGV", "B35", 600, 242)
 
         
         # get mutation information for the given variant alias if an ID is there
@@ -75,7 +77,8 @@ def main(variant_alias_file, output, images, xlsx, sheet):
 
         # save the filled sheet and convert to PDF
         template.save(output_name)
-        Fill.convert2pdf(output_name)
+        if pdf:
+            Fill.convert2pdf(output_name)
         
         # clear the dicts items
         variant_dict = {key: "-" for key in variant_dict}

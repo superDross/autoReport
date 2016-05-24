@@ -1,8 +1,9 @@
 import openpyxl
+import sys
 from openpyxl.styles import Border, Alignment, Font, Side
 from openpyxl.styles.colors import BLACK
 
-
+# alter formating if it is windows
 
 def create_template(output_path=""):
     ''' Create a template report workbook
