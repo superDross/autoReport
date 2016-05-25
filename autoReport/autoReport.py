@@ -5,9 +5,8 @@ from get_spreadsheet_info import ExtractInfo
 from create_template import create_template
 from fill_report import FillReport
 
-# if alter image size
 
-@click.command('autoreport')
+@click.command('autoReport')
 @click.argument('variant_alias_file')
 @click.option('--xlsx')
 @click.option('--sheet', default="0")

@@ -1,0 +1,4 @@
+
+        [console_scripts]
+        autoReport=autoReport.autoReport.autoReport:autoReport
+    

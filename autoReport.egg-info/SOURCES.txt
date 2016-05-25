@@ -1,0 +1,13 @@
+README.txt
+autoReport/__init__.py
+autoReport/autoReport.py
+autoReport/create_template.py
+autoReport/extract_info.py
+autoReport/fill_report.py
+autoReport/get_spreadsheet_info.py
+autoReport.egg-info/PKG-INFO
+autoReport.egg-info/SOURCES.txt
+autoReport.egg-info/dependency_links.txt
+autoReport.egg-info/entry_points.txt
+autoReport.egg-info/requires.txt
+autoReport.egg-info/top_level.txt
