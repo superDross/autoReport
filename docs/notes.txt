@@ -1,3 +1,6 @@
 
 24/5/16
 Proper formating of the pdf is highly dependent upon ssconvert gnumeric 1.12.29. The pdf is pretty terrible looking using gnumeric 1.12.128. I would prefer to not be dependent upon a linux based software but there doesnot seem to be any python libraries I can use to convert xlsx to pdf.
+
+25/5/16
+added to some variables in create_template that alters how the template is created depedning on which platform is used. The problem is that none of the dict entries are being added to the right cells in the win32 version. This is quite irratting.
